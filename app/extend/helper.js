@@ -36,7 +36,7 @@ module.exports = {
         }
         config._bodyContent = config._html.match(/<body>([\s\S]+?)<\/body>/)[1].trim();
       } catch (e) {
-        config._bodyContent = `<div>${e.message}</div>`;
+        config._bodyContent = '<div id="app"></div>';
       }
 
       return config._bodyContent + scriptTpl('/assets/app.js');

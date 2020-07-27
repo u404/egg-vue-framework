@@ -31,8 +31,6 @@ class DevServer extends Base {
 
     const [ command, ...args ] = this.commandStr.split(/\s+/);
 
-    logger.warn('[egg-dev-server] path %s', path.resolve(__dirname, 'lib/vue.config.js'));
-
     const proc = this.proc = spawn(command, args, {
       stdio: [ 'inherit', 'pipe', 'inherit' ],
       env: {
