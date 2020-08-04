@@ -2,6 +2,12 @@
 
 egg与vue-cli组合共同构建项目
 
+
+## Demo - 可以直接使用的后台样板项目
+一个基于egg 和 vue-manage-system UI 搭建的 后台样板项目，可以直接克隆下来使用
+https://github.com/u404/egg-vue-manage-system
+
+
 ## QuickStart
 
 1. 使用创建egg项目

@@ -1,6 +1,6 @@
 {
   "name": "egg-vue-framework",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "egg与vue-cli组合共同构建项目",
   "dependencies": {
     "await-event": "^2.1.0",
