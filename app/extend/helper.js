@@ -1,56 +1,40 @@
 
 'use strict';
 
-const path = require('path');
-const fs = require('fs');
-
-
-const scriptTpl = (src = '') => {
-  return `<script src="${src}"></script>`;
-};
+const httpProxy = require('http-proxy');
+const PROXYSERVER = Symbol('context#proxyServer');
 
 module.exports = {
-  getLinks() {
-    const { config } = this.app;
-    if (config.env === 'local') {
-      return '';
-    }
-    if (!config._links) {
-      try {
-        if (!config._html) {
-          config._html = fs.readFileSync(path.resolve(config.baseDir, 'app/web/dist/index.html')).toString();
-        }
-        config._links = config._html.match(/<link.+?>/g).join('');
-      } catch (e) {
-        config._links = '';
-      }
-    }
-    return config._links;
-  },
-  getBodyContent() {
-    const { config } = this.app;
-    if (config.env === 'local') {
-      try {
-        if (!config._html) {
-          config._html = fs.readFileSync(path.resolve(config.baseDir, 'app/web/public/index.html')).toString();
-        }
-        config._bodyContent = config._html.match(/<body>([\s\S]+?)<\/body>/)[1].trim();
-      } catch (e) {
-        config._bodyContent = '<div id="app"></div>';
-      }
 
-      return config._bodyContent + scriptTpl('/assets/app.js');
+  proxyWeb(target, options = {}) {
+    const { ctx } = this;
+
+    if (!this[PROXYSERVER]) {
+      this[PROXYSERVER] = httpProxy.createProxyServer({});
     }
-    if (!config._bodyContent) {
-      try {
-        if (!config._html) {
-          config._html = fs.readFileSync(path.resolve(config.baseDir, 'app/web/dist/index.html')).toString();
-        }
-        config._bodyContent = config._html.match(/<body>([\s\S]+?)<\/body>/)[1];
-      } catch (e) {
-        config._bodyContent = `<div>${e.message}</div>`;
-      }
+
+    const { path } = options;
+
+    if (path) {
+      ctx.req.url = path;
     }
-    return config._bodyContent;
+
+    this[PROXYSERVER].web(ctx.req, ctx.res, {
+      target,
+    });
+    ctx.respond = false;
   },
+
+  async renderWebApp() {
+    const { ctx } = this;
+    const { config } = this.app;
+    if (config.env === 'local') {
+      ctx.helper.proxyWeb(`http://localhost:${config.devServer.port}`, {
+        path: `${config.vue.webPath}/index.html`,
+      });
+    } else {
+      await ctx.render(`${config.vue.outputDir}/index.html`);
+    }
+  },
+
 };

@@ -16,6 +16,11 @@ module.exports = appInfo => {
 
   config.view = {
     defaultViewEngine: 'nunjucks',
+    root: [
+      path.join(appInfo.baseDir, 'app/view'),
+      path.join(appInfo.baseDir, 'app/web'),
+    ].join(','),
+    cache: appInfo.env !== 'local',
     mapping: {
       '.html': 'nunjucks',
     },
@@ -35,23 +40,28 @@ module.exports = appInfo => {
     },
   };
 
-  config.devServer = appInfo.env === 'local' && {
-    port: 8002,
-  };
-
-  config.httpProxy = appInfo.env === 'local' && {
-    '/assets': `http://localhost:${config.devServer.port}`,
-    '/sockjs-node': `http://localhost:${config.devServer.port}`,
-  };
-
   config.development = {
     reloadPattern: [ '**', '!**/web/**/*.*' ],
   };
 
-  config.static = appInfo.env === 'prod' ? {
-    prefix: '/assets/',
-    dir: path.join(appInfo.baseDir, 'app/web/dist'),
+  config.devServer = appInfo.env === 'local' && {
+    port: 8002,
+  };
+
+  config.vue = {
+    webPath: '/web',
+    outputDir: 'dist',
+  };
+
+  config.proxy = appInfo.env === 'local' ? {
+    prefix: [ config.vue.webPath, '/sockjs-node' ],
+    target: `http://localhost:${config.devServer.port}`,
   } : {};
+
+  config.static = appInfo.env === 'local' ? {} : {
+    prefix: config.vue.webPath,
+    dir: path.join(appInfo.baseDir, `app/web/${config.vue.outputDir}`),
+  };
 
   return config;
 };

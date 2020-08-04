@@ -31,19 +31,22 @@ class DevServer extends Base {
 
     const [ command, ...args ] = this.commandStr.split(/\s+/);
 
+    const context = path.join(this.app.config.baseDir, 'app/web');
+
     const proc = this.proc = spawn(command, args, {
       stdio: [ 'inherit', 'pipe', 'inherit' ],
       env: {
-        VUE_CLI_SERVICE_CONFIG_PATH: path.resolve(__dirname, 'lib/vue.config.js'),
+        // VUE_CLI_SERVICE_CONFIG_PATH: path.resolve(__dirname, 'lib/vue.config.js'),
+        VUE_CLI_CONTEXT: context,
       },
-      cwd: path.resolve(this.app.config.baseDir),
+      cwd: context,
     });
 
     proc.once('error', err => this.exit(err));
     proc.once('exit', code => this.exit(code));
 
     proc.on('error', err => {
-      console.log('error-----', err);
+      logger.error(err);
     });
 
     proc.stdout.on('data', data => {
